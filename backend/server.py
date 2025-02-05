@@ -1,7 +1,6 @@
 from flask import Flask, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from services import crawler_service
 from models.models import db
+from services import crawler_service
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///products.db'
