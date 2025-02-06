@@ -15,7 +15,7 @@ Ein Web-Dashboard zur Aggregation und zum Vergleich von Baustoffpreisen verschie
 
 - **Backend**: Python/Flask
 - **Datenbank**: SQLAlchemy
-- **Frontend**: Bootstrap/HTMX
+- **Frontend**: React(TypeScript)
 - **Deployment**: Docker
 
 ## Installation
