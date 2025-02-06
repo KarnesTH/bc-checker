@@ -1,11 +1,22 @@
+import os
+
 from flask import Flask, jsonify
-from models.models import db
+from flask_cors import CORS
+from models.models import Product, db
 from services import crawler_service
+from utils.seed_db import seed_database
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///products.db'
+CORS(app)
+db_path = os.path.join(app.instance_path, 'products.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.debug = True
 db.init_app(app)
+
+with app.app_context():
+    if not Product.query.first():
+        seed_database(app)
 
 @app.route('/api/health')
 def health_check():
@@ -21,7 +32,22 @@ def test_crawler():
         })
     return jsonify({"status": "error", "message": "Failed to fetch page"})
 
+@app.route('/api/products', methods=['GET'])
+def get_products():
+    products = Product.query.all()
+    return jsonify([{
+        'id': p.id,
+        'name': p.name,
+        'sku': p.sku,
+        'category': p.category,
+        'prices': [{
+            'id': price.id,
+            'price': price.price,
+            'unit': price.unit,
+            'vendor': price.vendor,
+            'timestamp': price.timestamp.isoformat()
+        } for price in p.prices]
+    } for p in products])
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
