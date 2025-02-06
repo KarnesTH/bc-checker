@@ -1,54 +1,47 @@
-import { Product } from "../../types";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../store";
+import { fetchProducts } from "../../store/features/productSlice";
 import ProductCard from "./product-card/ProductCard";
 
-const testData: Product[] = [
-  {
-    id: 1,
-    name: "Portland Zement",
-    sku: "PZ-001",
-    category: "Zement",
-    prices: [
-      {
-        id: 1,
-        price: 12.99,
-        unit: "kg",
-        vendor: "Bauhaus",
-        timestamp: new Date().toISOString(),
-      },
-      {
-        id: 2,
-        price: 13.99,
-        unit: "kg",
-        vendor: "Hornbach",
-        timestamp: new Date().toISOString(),
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: "Kalksandstein",
-    sku: "KS-001",
-    category: "Steine",
-    prices: [
-      {
-        id: 3,
-        price: 24.99,
-        unit: "Stück",
-        vendor: "Hornbach",
-        timestamp: new Date().toISOString(),
-      },
-    ],
-  },
-];
-
 function ProductGrid() {
+  const dispatch = useDispatch<AppDispatch>();
+  const { items, status, error } = useSelector(
+    (state: RootState) => state.products,
+  );
+  const filters = useSelector((state: RootState) => state.filter);
+
+  useEffect(() => {
+    if (status === "idle") {
+      dispatch(fetchProducts());
+    }
+  }, [status, dispatch]);
+
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  }
+
+  if (status === "failed") {
+    return <div>Error: {error}</div>;
+  }
+
+  const filteredProducts = items.filter((product) => {
+    return (
+      filters.selectedCategories.includes(product.category) &&
+      filters.selectedVendors.includes(product.sku) &&
+      product.prices.some(
+        (price) =>
+          price.price >= filters.priceRange.min &&
+          price.price <= filters.priceRange.max,
+      )
+    );
+  });
+
   return (
-    <div className="p-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {testData.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+      {filteredProducts.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
     </div>
   );
 }
