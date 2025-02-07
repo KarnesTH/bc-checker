@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from flask_sqlalchemy import SQLAlchemy
 
@@ -12,7 +12,7 @@ class Material(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
     unit = db.Column(db.String(20))
-    created = db.Column(db.DateTime, default=datetime.utcnow)
+    created = db.Column(db.DateTime, default=datetime.now(UTC))
     prices = db.relationship('Price', backref='material', lazy=True)
 
     def __repr__(self):
@@ -27,7 +27,7 @@ class Price(db.Model):
     amount = db.Column(db.Float, nullable=False)
     vendor = db.Column(db.String(100), nullable=False)
     url = db.Column(db.String(500))
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=datetime.now(UTC))
     material_id = db.Column(db.Integer, db.ForeignKey('material.id'), nullable=False)
 
     def __repr__(self):

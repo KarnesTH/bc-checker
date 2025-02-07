@@ -39,7 +39,11 @@ def get_materials():
 def get_material(material_id):
     """Returns details for a specific material"""
     try:
-        material = Material.query.get_or_404(material_id)
+        material = db.session.get(Material, material_id)
+
+        if not material:
+            return jsonify({'message': 'Material not found'}), 404
+
         return jsonify(material_to_dict(material))
     except SQLAlchemyError as e:
         return jsonify({'message': f'Failed to fetch material: {e}'}), 500
