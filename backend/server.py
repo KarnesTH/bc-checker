@@ -3,7 +3,6 @@ import os
 from flask import Flask, jsonify
 from flask_cors import CORS
 from models.models import Product, db
-from services import crawler_service
 from utils.seed_db import seed_database
 
 app = Flask(__name__)

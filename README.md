@@ -50,7 +50,7 @@ graph LR
 
 1. Clone repository:
 ```bash
-git clone https://github.com/YourUsername/bc-checker.git
+git clone https://github.com/KarnesTH/bc-checker.git
 cd bc-checker
 ```
 
