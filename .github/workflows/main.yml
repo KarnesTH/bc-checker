@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
     steps:
       - uses: actions/checkout@v3
 
@@ -23,10 +26,14 @@ jobs:
           pip install ruff pytest
           pip install -r backend/requirements.txt
 
+      - name: Create instance directory
+        run: |
+          mkdir -p instance
+
       - name: Lint with ruff
         run: |
           ruff check .
 
       - name: Test with pytest
         run: |
-          pytest
+          PYTHONPATH=. pytest
