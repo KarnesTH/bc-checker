@@ -1,19 +1,19 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
-import requests
 from services import crawler_service
 
 
-@patch('utils.utils.RobotFileParser')
-@patch('requests.get')
-def test_fetch_page(mock_get, mock_robot_parser):
-    robot_instance = mock_robot_parser.return_value
-    robot_instance.can_fetch.return_value = True
-    robot_instance.read.return_value = None
+@patch('services.crawler_service.sync_playwright')
+@patch('services.crawler_service.is_crawlable', return_value=True)
+def test_fetch_page(mock_crawlable, mock_playwright):
+    mock_browser = MagicMock()
+    mock_page = MagicMock()
 
-    mock_response = mock_get.return_value
-    mock_response.text = '<html><title>Test Page</title></html>'
-    mock_response.raise_for_status.return_value = None
+    mock_instance = MagicMock()
+    mock_playwright.return_value = mock_instance
+    mock_instance.__enter__.return_value.chromium.launch.return_value = mock_browser
+    mock_browser.new_page.return_value = mock_page
+    mock_page.content.return_value = '<html><title>Test Page</title></html>'
 
     result = crawler_service.fetch_page('https://www.example.com/page')
 
@@ -21,30 +21,19 @@ def test_fetch_page(mock_get, mock_robot_parser):
     assert result.title is not None
     assert result.title.string == 'Test Page'
 
-    mock_get.assert_called_once()
-    robot_instance.can_fetch.assert_called_once()
-
-@patch('utils.utils.RobotFileParser')
-@patch('requests.get')
-def test_fetch_page_not_crawlable(mock_get, mock_robot_parser):
-    robot_instance = mock_robot_parser.return_value
-    robot_instance.can_fetch.return_value = False
-    robot_instance.read.return_value = None
-
+@patch('services.crawler_service.sync_playwright')
+@patch('services.crawler_service.is_crawlable', return_value=False)
+def test_fetch_page_not_crawlable(mock_crawlable, mock_playwright):
     result = crawler_service.fetch_page('https://www.example.com/page')
-
     assert result is None
-    mock_get.assert_not_called()
+    mock_playwright.assert_not_called()
 
-@patch('utils.utils.RobotFileParser')
-@patch('requests.get')
-def test_fetch_page_request_error(mock_get, mock_robot_parser):
-    robot_instance = mock_robot_parser.return_value
-    robot_instance.can_fetch.return_value = True
-    robot_instance.read.return_value = None
-
-    mock_get.side_effect = requests.RequestException("Test error")
+@patch('services.crawler_service.sync_playwright')
+@patch('services.crawler_service.is_crawlable', return_value=True)
+def test_fetch_page_error(mock_crawlable, mock_playwright):
+    mock_instance = MagicMock()
+    mock_playwright.return_value = mock_instance
+    mock_instance.__enter__.side_effect = Exception("Test error")
 
     result = crawler_service.fetch_page('https://www.example.com/page')
-
     assert result is None

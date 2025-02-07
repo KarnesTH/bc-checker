@@ -26,6 +26,11 @@ jobs:
           pip install ruff pytest
           pip install -r requirements.txt
 
+      - name: Install Playwright
+        run: |
+          playwright install chromium
+          playwright install-deps chronium
+
       - name: Create instance directory
         run: |
           mkdir -p instance
