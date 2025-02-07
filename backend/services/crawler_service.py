@@ -1,11 +1,14 @@
-from typing import Optional
-
 import requests
 from bs4 import BeautifulSoup
+from utils.utils import is_crawlable
 
 
-def fetch_page(url: str) -> Optional[BeautifulSoup]:
+def fetch_page(url):
     """Fetches a page and returns a BeautifulSoup object"""
+    if not is_crawlable(url):
+        print(f"URL {url} is not crawlable")
+        return None
+
     try:
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
